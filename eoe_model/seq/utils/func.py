@@ -60,8 +60,7 @@ def simple_batching(config, insts, tokenizer, word_pad_idx=0):
     doc_sent_ids = []
     max_token_len = 0
     for idx, doc in enumerate(doc_sents):
-        sent_ids = [tokenizer.encode_plus(sent).input_ids for sent in doc]
-        # sent_ids = [tokenizer.encode_plus(sent, events[idx]).input_ids for sent in doc]  # doc_len * token_num
+        sent_ids = [tokenizer.encode_plus(sent, events[idx]).input_ids for sent in doc]  # doc_len * token_num
         max_token_len = max(max_token_len, max([len(sent) for sent in sent_ids]))
         doc_sent_ids.append(sent_ids)
     # padding: batch_size, max_seq_len, max_token_len
