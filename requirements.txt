@@ -1,0 +1,8 @@
+torch==1.8.0
+transformers==4.15.0
+tensorboardX==2.4
+numpy
+pandas
+tqdm
+jieba
+termcolor
