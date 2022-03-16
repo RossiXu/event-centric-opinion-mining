@@ -68,6 +68,7 @@ The data format is as follows:
         ]
     }
 },
+}
 ```
 train/val/test.json are data files and each line is a JSON instance. Each JSON instance contains Descriptor and Doc fields, in which Descriptor is event descriptor, and Doc is the annotated document.
 
