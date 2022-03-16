@@ -189,3 +189,6 @@ python eval/eval_seq.py \
        --opinion_level segment
 ```
 - ```--opinion_level``` refers to segment/sentence-level evaluation metrics. Evaluate by segment/sentence-level if 'segment'/'sent'.
+
+## License
+The code is released under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License for Noncommercial use only. Any commercial use should get formal permission first.
