@@ -25,23 +25,51 @@ Before training models, you should first download [data](http://123.57.148.143/E
 ```
 data
 ├── ECOB-ZH  # Chinese dataset.
-├── ── train.txt
-├── ── dev.txt
-├── ── test.txt
+├── ── train.json
+├── ── dev.json
+├── ── test.json
 ├──   ECOB-EN  # English dataset.
-├── ── train.txt
-├── ── dev.txt
-└── ── test.txt
+├── ── train.json
+├── ── dev.json
+└── ── test.json
 ```
 
 The data format is as follows:
 ```
-<the event descriptor>  <all possible arguments>
-<the title>
-<sentence> <BIO tag> <opinion target>.
-------------------------------------------------------
+{
+    "Descriptor": {
+        "text": "22家电商被约谈",
+        "candidate_arguments": [
+            "电商",
+            "22家电商",
+            "22家电商被约谈"
+        ]
+    },
+        "Doc": {
+            "id": 2109,
+            "title": "双11将至，这22家电商被约谈！",
+            "content": [
+                [
+                    "11月1日，南都记者从上海市市场监管局获悉，日前，该局联合多部门召集途虎养车、美团点评、国美在线、小红书、健一网、药房网、洋码头等22家电商企业召开“规范‘双十一’网络集中促销活动”行政约谈会。",
+                    "O",
+                    "O"
+                ],
+                ...
+                [
+                    "上海市市场监管局表示，下一步相关部门将加大网络市场监管力度，重点打击商标侵权、虚假宣传、刷单炒信、价格欺诈等违法行为。",
+                    "B",
+                    "电商"
+                ],
+                [
+                    "加强网络交易商品（食品）质量抽检，依法查处网络销售不合格商品（食品）行为，严厉打击侵犯公民个人信息等违法犯罪活动。",
+                    "I",
+                    "电商"
+                ]
+            ]
+        }
+    },
 ```
-Each entry is separated by a \t. Each instance (that is, a document) is separated by a '-'*54 line.
+train/val/test.json are data files and each line is a JSON instance. Each JSON instance contains Descriptor and Doc fields, in which Descriptor is event descriptor, and Doc is the annotated document.
 
 ### Model Training
 
