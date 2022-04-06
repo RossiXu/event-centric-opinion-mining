@@ -19,7 +19,7 @@ pip install -r requirements.txt
 
 ## Quick Start
 ### Data Format
-Data folder contains two folders: ECO-EN and ECO-ZH.
+Data folder contains two folders: ECOB-EN and ECOB-ZH.
 
 Before training models, you should first download [data](http://e-com.ac.cn/ECO_Bank.zip) and unzip them as follows. 
 ```
