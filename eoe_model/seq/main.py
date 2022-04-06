@@ -10,8 +10,8 @@ from typing import List
 from termcolor import colored
 from tqdm import tqdm
 from transformers import BertTokenizer
-from utils import Instance, Reader
-from utils import lr_decay, batching_list_instances, simple_batching, get_optimizer, set_seed, write_results, evaluate_batch_insts
+from utils import Instance
+from utils import lr_decay, batching_list_instances, simple_batching, get_optimizer, set_seed, write_results, evaluate_batch_insts, read_data
 from config import Config
 from model import NNCRF
 
@@ -26,13 +26,11 @@ def parse_arguments(parser):
                         choices=['cpu', 'cuda:0', 'cuda:1', 'cuda:2', 'cuda:3', 'cuda:4', 'cuda:5', 'cuda:6', 'cuda:7'],
                         help="GPU/CPU devices")
     parser.add_argument('--seed', type=int, default=42, help="random seed")
-    parser.add_argument('--digit2zero', action="store_true", default=True,
-                        help="convert the number to 0, make it true is better")
     parser.add_argument('--data_dir', type=str, default="../../data/")
     parser.add_argument('--result_dir', type=str, default="../../result/chinese_result/")
-    parser.add_argument('--train_file', type=str, default="train.txt")
-    parser.add_argument('--dev_file', type=str, default="dev.txt")
-    parser.add_argument('--test_file', type=str, default="test.txt")
+    parser.add_argument('--train_file', type=str, default="train.json")
+    parser.add_argument('--dev_file', type=str, default="dev.json")
+    parser.add_argument('--test_file', type=str, default="test.json")
     parser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--backbone_lr', type=float, default=1e-5)
     parser.add_argument('--lr', type=float, default=0.001)
@@ -107,7 +105,7 @@ def train_model(config: Config, epoch: int, test_insts, train_insts=None, dev_in
 
     # If model exists, evaluate and save results.
     if os.path.exists(model_dir):
-        model.load_state_dict(torch.load(model_path, map_location='cuda:0'))
+        model.load_state_dict(torch.load(model_path, map_location=config.device))
         model.eval()
         evaluate_model(config, model, test_batches, "test", test_insts, tokenizer)
         write_results(res_path, test_insts)
@@ -222,18 +220,17 @@ def main():
     opt.test_file = opt.data_dir + opt.test_file
     conf = Config(opt)
 
-    # Read train/test/dev.txt into instance.
-    reader = Reader(conf.digit2zero)
     set_seed(opt, conf.seed)
 
+    # Read train/test/dev.json into instance.
     is_eval = conf.is_eval
     if not is_eval:
-        devs = reader.read_txt(conf.dev_file, conf.dev_num)
-        tests = reader.read_txt(conf.test_file, conf.test_num)
-        trains = reader.read_txt(conf.train_file, conf.train_num)
+        devs = read_data(conf.dev_file, conf.dev_num)
+        tests = read_data(conf.test_file, conf.test_num)
+        trains = read_data(conf.train_file, conf.train_num)
     else:
         trains, devs = [], []
-        tests = reader.read_txt(conf.test_file, conf.test_num)
+        tests = read_data(conf.test_file, conf.test_num)
 
     # Data Preprocess.
     # Relabel IBO labels to IOBES labels.

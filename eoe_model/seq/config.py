@@ -29,7 +29,6 @@ class Config:
         # Model hyper parameters
         self.embedding_dim = args.embedding_dim
         self.seed = args.seed
-        self.digit2zero = args.digit2zero
         self.hidden_dim = args.hidden_dim
         self.use_brnn = True
         self.num_layers = 1
@@ -94,13 +93,13 @@ class Config:
 
         # extract word on train, dev, test
         for inst in train_insts + dev_insts + test_insts:
-            for sent in inst.input.sents:
+            for sent in inst.input:
                 if sent not in self.word2idx:
                     self.word2idx[sent] = len(self.word2idx)
                     self.idx2word.append(sent)
         # extract char only on train (doesn't matter for dev and test)
         for inst in train_insts:
-            for sent in inst.input.sents:
+            for sent in inst.input:
                 for c in sent:
                     if c not in self.char2idx:
                         self.char2idx[c] = len(self.idx2char)
@@ -161,7 +160,7 @@ class Config:
         """
 
         for inst in insts:
-            sents = inst.input.sents
+            sents = inst.input
             inst.word_ids = []
             inst.char_ids = []
             inst.output_ids = [] if inst.output else None

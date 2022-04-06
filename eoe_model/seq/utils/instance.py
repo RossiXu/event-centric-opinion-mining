@@ -1,4 +1,3 @@
-from sentence import Sentence
 from typing import List
 
 
@@ -7,7 +6,7 @@ class Instance:
     This class is the basic Instance for a datasample
     """
 
-    def __init__(self, input: Sentence, event: str = None, title: str = None, output: List[str] = None, target: List[str] = None) -> None:
+    def __init__(self, input: List[str] = None, event: str = None, title: str = None, output: List[str] = None, target: List[str] = None) -> None:
         """
         Constructor for the instance.
         :param input: sentence containing the words

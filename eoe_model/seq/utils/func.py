@@ -1,13 +1,36 @@
+import json
 import random
 
 import torch
 import numpy as np
 from termcolor import colored
-from torch import optim, nn
+from torch import optim
 
 from instance import Instance
-from constant import PAD
-from typing import List, Tuple
+from typing import List
+
+
+def read_data(file: str, number: int = 5) -> List[Instance]:
+    print("Reading file: " + file)
+    insts = []
+
+    # construct instances
+    with open(file, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+        if number > 0:
+            data = data[:number]
+            print(data)
+
+    for passage in data:
+        event = passage['Descriptor']['text']
+        title = passage['Doc']['title']
+        contents = passage['Doc']['content']
+        sents, labels, targets = zip(*[[content[0].strip(), content[1].strip(), content[2].strip()] for content in contents])
+        inst = Instance(list(sents), event, title, list(labels), list(targets))
+        insts.append(inst)
+
+    print("Number of documents: {}".format(len(insts)))
+    return insts
 
 
 def log_sum_exp_pytorch(vec: torch.Tensor) -> torch.Tensor:
@@ -27,7 +50,7 @@ def batching_list_instances(batch_size, insts: List[Instance], shffule=True):
     List of instances -> List of batches
     """
     if shffule:
-        insts.sort(key=lambda x: len(x.input.sents))
+        insts.sort(key=lambda x: len(x.input))
     train_num = len(insts)
     total_batch = train_num // batch_size + 1 if train_num % batch_size != 0 else train_num // batch_size
     batched_data = []
@@ -52,10 +75,10 @@ def simple_batching(config, insts, tokenizer, word_pad_idx=0):
     batch_size = len(batch_data)
     word_pad_idx = word_pad_idx
     # doc len
-    doc_sents = [inst.input.sents for inst in insts]  # doc_num * doc_len
+    doc_sents = [inst.input for inst in insts]  # doc_num * doc_len
     events = [inst.event for inst in insts]
     max_sent_len = max([len(doc_sent) for doc_sent in doc_sents])
-    sent_seq_len = torch.LongTensor(list(map(lambda inst: len(inst.input.sents), batch_data)))
+    sent_seq_len = torch.LongTensor(list(map(lambda inst: len(inst.input), batch_data)))
     # sent tensor
     doc_sent_ids = []
     max_token_len = 0
@@ -152,7 +175,7 @@ def write_results(filename: str, insts):
         f.write(event + '\n')
         f.write(title + '\n')
         for i in range(len(inst.input)):
-            sents = inst.input.ori_sents
+            sents = inst.input
             output = inst.output
             aspect = inst.target
             prediction = inst.prediction
