@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import pandas as pd
 import random
@@ -8,27 +10,21 @@ from tqdm import tqdm
 
 def data_preprocess(file_name):
     with open(file_name, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
+        data = json.load(f)
+
     pairs = []
-    psgs = []
-    psg = []
-    for line in lines:
-        if '---------------' in line:
-            psgs.append(psg)
-            psg = []
-            continue
-        psg.append(line)
-    psgs = [psg for psg in psgs if len(psg) >= 3]
-    for psg in psgs:
-        event = psg[0].split('\t')[0]
-        for idx in range(2, len(psg)):
-            if psg[idx].strip():
-                opinion_sent = psg[idx].split('\t')[0]
-                relation = 0 if psg[idx].split('\t')[1] == 'O' else 1
-                pairs.append((opinion_sent, event, relation))
+    for passage in data:
+        event = passage['Descriptor']['text']
+        contents = passage['Doc']['content']
+        sents = [content[0].strip() for content in contents]
+        labels = [content[1].strip() for content in contents]
+        for idx, sent in enumerate(sents):
+            label = 0 if labels[idx] == 'O' else 1
+            pairs.append([sent, event, label])
+
     data = pd.DataFrame(pairs)
     data.columns = ['sent', 'event', 'is_opinion']
-    print(file_name, len(psgs), sum([pair[2] for pair in pairs]), len(pairs)-sum([pair[2] for pair in pairs]))
+    print(file_name, len(data), sum([pair[2] for pair in pairs]), len(pairs)-sum([pair[2] for pair in pairs]))
     return data
 
 
