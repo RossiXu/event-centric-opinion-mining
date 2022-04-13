@@ -21,7 +21,7 @@ pip install -r requirements.txt
 ### Data Format
 Data folder contains two folders: ECOB-EN and ECOB-ZH.
 
-Before training models, you should first download [data](http://e-com.ac.cn/ECO_Bank.zip) and unzip them as follows. 
+Before training models, you should first download [data](http://123.57.148.143/ECO_Bank.zip) and unzip them as follows. 
 ```
 data
 ├── ECOB-ZH  # Chinese dataset.
@@ -38,32 +38,33 @@ The data format is as follows:
 ```
 {
     "Descriptor": {
-        "text": "22家电商被约谈",
-        "candidate_arguments": [
-            "电商",
-            "22家电商",
-            "22家电商被约谈"
-        ]
+        "text": "EU orders Apple to repay $14.5bn in taxes",
     },
     "Doc": {
-        "id": 2109,
-        "title": "双11将至，这22家电商被约谈！",
+        "id": 1917,
+        "title": "EU competition chief Margrethe Vestager is leading the probe into Apple's tax affairs",
         "content": [
             [
-                "11月1日，南都记者从上海市市场监管局获悉，日前，该局联合多部门召集途虎养车、美团点评、国美在线、小红书、健一网、药房网、洋码头等22家电商企业召开“规范‘双十一’网络集中促销活动”行政约谈会。",
+                "Apple could be ordered to pay billions of euros in back taxes in the Republic of Ireland by European Union competition officials.",
                 "O",
                 "O"
             ],
             ...
             [
-                "上海市市场监管局表示，下一步相关部门将加大网络市场监管力度，重点打击商标侵权、虚假宣传、刷单炒信、价格欺诈等违法行为。",
+                "Last week the US Treasury Department said the European Commission was in danger of becoming a "supra-national tax authority" overriding the tax codes of its member states.",
                 "B",
-                "电商"
+                "EU"
+            ],
+            ...
+            [
+                "“This is not a decision against the United States of America,” Juncker told reporters.",
+                "B",
+                "EU orders Apple to repay $14.5bn in taxes"
             ],
             [
-                "加强网络交易商品（食品）质量抽检，依法查处网络销售不合格商品（食品）行为，严厉打击侵犯公民个人信息等违法犯罪活动。",
+                "“It would be absurd to choose this territory of state taxation to attack the USA,” he added, according to AFP.",
                 "I",
-                "电商"
+                "EU orders Apple to repay $14.5bn in taxes"
             ]
         ]
     }
@@ -178,7 +179,7 @@ python ote_model/mrc/main.py \
       --output_dir model_files/chinese_model/mrc/ \
       --data_dir data/ECOB-ZH/ \
       --result_dir result/chinese_result/ \
-      --predict_file test.txt
+      --predict_file test.json
 python eval/eval_aspect.py \
       --language chinese \
       --result_dir result/chinese_result/ \
