@@ -27,9 +27,9 @@ def parse_arguments(parser):
     parser.add_argument('--data_dir', type=str, default='../../data/')
     parser.add_argument('--result_dir', type=str, default='../../result/chinese_result/')
     parser.add_argument('--result_file', type=str, default='enumerate.results')
-    parser.add_argument('--train_file', type=str, default="train.txt")
-    parser.add_argument('--dev_file', type=str, default="dev.txt")
-    parser.add_argument('--test_file', type=str, default="test.txt")
+    parser.add_argument('--train_file', type=str, default="train.json")
+    parser.add_argument('--dev_file', type=str, default="dev.json")
+    parser.add_argument('--test_file', type=str, default="test.json")
     parser.add_argument('--bert', type=str, default="bert-base-cased")
     parser.add_argument('--opinion_level', type=str, default='segment', choices=['segment', 'sent'])
     parser.add_argument('--retrain', type=int, default=1, choices=[0, 1])
@@ -58,11 +58,6 @@ def train_model(retrain=True, opinion_level='segment', ratio=3):
     # Load training data.
     if retrain:
         train_df = data_preprocess(data_dir + train_file, ratio=ratio, opinion_level=opinion_level, language=language)
-        dev_df = data_preprocess(data_dir + dev_file, ratio=ratio, opinion_level=opinion_level, language=language)
-        eval_df = data_preprocess(data_dir + test_file, ratio=ratio, opinion_level=opinion_level, language=language)
-
-    # Get Bert input format.
-    if retrain:
         train_batches = data_batch(train_df, batch_size)
 
     # If model exists, evaluate and save results.

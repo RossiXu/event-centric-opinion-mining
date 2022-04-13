@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import pandas as pd
 import random
@@ -31,54 +33,40 @@ def get_spans(text, language='english'):
 
 def data_preprocess(file_name, ratio=3, opinion_level='segment', language='english'):
     with open(file_name, 'r', encoding='utf-8') as f:
-        data = f.read()
-    psgs = data.split('-' * 54)
+        data = json.load(f)
+
     insts = []
-    spans = {}
-    for psg in psgs:
-        psg = psg.strip().split('\n')
-        event = psg[0].split('\t')[0]
+    spans = {}  # event: spans
+    for passage in data:
+        event = passage['Descriptor']['text'].strip()
+        contents = passage['Doc']['content']
+        sents = [content[0].strip() for content in contents]
+        labels = [content[1].strip() for content in contents]
+        aspects = [content[2].strip() for content in contents]
+
         if event not in spans.keys():
             spans[event] = get_spans(event, language)
-        lines = psg[2:]
-        if opinion_level == 'segment':
+
+        if opinion_level == 'sent':
+            for idx, label in enumerate(labels):
+                if label == 'B' or label == 'I':
+                    insts.append([sents[idx].strip(), spans[event], event, aspects[idx]])
+        elif opinion_level == 'segment':
             opinion = ''
-            for line_idx, line in enumerate(lines):
-                line_split = [ele for ele in line.strip().split('\t') if len(ele)]
-                if len(line_split) == 3:
-                    sent, label, aspect = line_split
-                elif len(line_split) == 4:
-                    sent, label, aspect, _ = line_split
-                elif len(line_split) == 5:
-                    sent, label, _, _, aspect = line_split
-                else:
-                    print('Data format is wrong! ', line_split)
+            for idx, label in enumerate(labels):
                 if (label == 'B' and not opinion) or label == 'I':
-                    opinion += sent
+                    opinion += sents[idx]
                 elif label == 'B' and opinion:
-                    old_aspect = [ele for ele in lines[line_idx - 1].strip().split('\t') if len(ele)][2]
+                    old_aspect = aspects[idx - 1]
                     insts.append([opinion, spans[event], event, old_aspect])
-                    opinion = sent
+                    opinion = sents[idx]
                 elif label == 'O' and opinion:
-                    old_aspect = [ele for ele in lines[line_idx-1].strip().split('\t') if len(ele)][2]
+                    old_aspect = aspects[idx - 1]
                     insts.append([opinion, spans[event], event, old_aspect])
                     opinion = ''
             if opinion:
-                insts.append([opinion, spans[event], event, aspect])
-        elif opinion_level == 'sent':
-            for line_idx, line in enumerate(lines):
-                line_split = [ele for ele in line.strip().split('\t') if len(ele)]
-                if len(line_split) == 3:
-                    sent, label, aspect = line_split
-                elif len(line_split) == 4:
-                    sent, label, aspect, _ = line_split
-                elif len(line_split) == 5:
-                    sent, label, _, _, aspect = line_split
-                else:
-                    print('Data format is wrong! ', line_split)
-                if label == 'B' or label == 'I':
-                    opinion = sent
-                    insts.append([opinion, spans[event], event, aspect])
+                insts.append([opinion, spans[event], event, aspects[-1]])
+
     print(file_name, 'num of opinions:', len(insts), sep='\t')
     input_insts = []
     for inst in insts:
