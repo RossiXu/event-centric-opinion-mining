@@ -15,40 +15,34 @@ logger = logging.getLogger(__name__)
 
 
 def data_preprocess(data, opinion_level):
-    psgs = data
     insts = []
-    for psg in psgs:
-        psg = psg.strip().split('\n')
-        event = psg[0].split('\t')[0]
-        lines = psg[2:]
-        opinion = []
-        for line_idx, line in enumerate(lines):
-            if len(line.strip().split('\t')) == 3:
-                sent, label, aspect = [ele.strip() for ele in line.strip().split('\t') if len(ele)]
-            elif len(line.strip().split('\t')) == 4:
-                sent, label, aspect, _ = [ele.strip() for ele in line.strip().split('\t') if len(ele)]
-            elif len(line.strip().split('\t')) == 5:
-                sent, label, aspect, _, _ = [ele.strip() for ele in line.strip().split('\t') if len(ele)]
-            else:
-                continue
+    for passage in data:
+        event = passage['Descriptor']['text'].strip()
+        contents = passage['Doc']['content']
+        sents = [content[0].strip() for content in contents]
+        labels = [content[1].strip() for content in contents]
+        aspects = [content[2].strip() for content in contents]
 
-            if opinion_level == 'segment':
-                if (label == 'B' and not opinion) or label == 'I':
-                    opinion.append(sent)
-                elif label == 'B' and opinion:
-                    old_aspect = [ele for ele in lines[line_idx - 1].strip().split('\t') if len(ele)][2]
-                    insts.append([opinion, event, old_aspect])
-                    opinion = [sent]
-                elif label == 'O' and opinion:
-                    old_aspect = [ele for ele in lines[line_idx-1].strip().split('\t') if len(ele)][2]
-                    insts.append([opinion, event, old_aspect])
-                    opinion = []
-            elif opinion_level == 'sent':
+        if opinion_level == 'sent':
+            for idx, label in enumerate(labels):
                 if label == 'B' or label == 'I':
-                    insts.append([sent, event, aspect])
+                    insts.append([sents[idx].strip(), event, aspects[idx]])
+        elif opinion_level == 'segment':
+            opinion = ''
+            for idx, label in enumerate(labels):
+                if (label == 'B' and not opinion) or label == 'I':
+                    opinion += sents[idx]
+                elif label == 'B' and opinion:
+                    old_aspect = aspects[idx - 1]
+                    insts.append([opinion, event, old_aspect])
+                    opinion = sents[idx]
+                elif label == 'O' and opinion:
+                    old_aspect = aspects[idx - 1]
+                    insts.append([opinion, event, old_aspect])
+                    opinion = ''
+            if opinion:
+                insts.append([opinion, event, aspects[-1]])
 
-        if len(opinion) and opinion_level == 'segment':
-            insts.append([opinion, event, aspect])
     return insts
 
 
@@ -155,13 +149,12 @@ class InputFeatures(object):
         self.is_impossible = is_impossible
 
 
-def read_squad_examples(input_file, is_training, version_2_with_negative, language='english', opinion_level='segment'):
-    """Read a SQuAD json file into a list of SquadExample."""
-    with open(input_file, "r", encoding='utf-8') as reader:
-        data = reader.read()
-        input_data = data.strip().split('-'*54)
+def read_squad_examples(input_file, language='english', opinion_level='segment'):
+    """Read a json file into a list of SquadExample."""
+    with open(input_file, 'r', encoding='utf-8') as f:
+        data = json.load(f)
 
-    opinions = data_preprocess(input_data, opinion_level)
+    opinions = data_preprocess(data, opinion_level)
     examples = []
     for idx, opinion in enumerate(opinions):  # opinion, event, aspect
         qas_id = idx

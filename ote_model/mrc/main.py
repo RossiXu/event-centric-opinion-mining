@@ -269,8 +269,6 @@ def load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=Fal
     else:
         logger.info("Creating features from dataset file at %s", input_file)
         examples = read_squad_examples(input_file=input_file,
-                                       is_training=not evaluate,
-                                       version_2_with_negative=args.version_2_with_negative,
                                        language=args.language,
                                        opinion_level=args.opinion_level)
         features = convert_examples_to_features(examples=examples,
@@ -309,9 +307,9 @@ def main():
     parser = argparse.ArgumentParser()
 
     ## Required parameters
-    parser.add_argument("--train_file", default='train.txt', type=str,
+    parser.add_argument("--train_file", default='train.json', type=str,
                         help="Training file.")
-    parser.add_argument("--predict_file", default='dev.txt', type=str,
+    parser.add_argument("--predict_file", default='dev.json', type=str,
                         help="Predicting file.")
     parser.add_argument("--data_dir", default='../../data/', type=str)
     parser.add_argument("--result_dir", default='../../result/chinese_result', type=str)
