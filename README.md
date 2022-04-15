@@ -19,6 +19,8 @@ pip install -r requirements.txt
 
 ## Quick Start
 ### Data Format
+**Additional Statement：** We plan to organize an evaluation in CCL2022. So the annoation in test.json is not available currently and we use "O" as replacement. After the evaluation, we'll open full dataset.
+
 Data folder contains two folders: ECOB-EN and ECOB-ZH.
 
 Before training models, you should first download [data](http://123.57.148.143/ECO_Bank.zip) and unzip them as follows. 
