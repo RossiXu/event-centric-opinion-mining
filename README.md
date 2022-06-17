@@ -19,7 +19,7 @@ pip install -r requirements.txt
 
 ## Quick Start
 ### Data Format
-**Additional Statement：** We plan to organize an evaluation in CCL2022. So the annoation in test.json is not available currently and we use "O" as replacement. After the evaluation, we'll open full dataset.
+**Additional Statement：** We organize [an evaluation](http://e-com.ac.cn/ccl2022.html/) in CCL2022. So the annoation in test.json is not available currently and we use "O" as replacement. After the evaluation, we'll open full dataset.
 
 Data folder contains two folders: ECOB-EN and ECOB-ZH.
 
