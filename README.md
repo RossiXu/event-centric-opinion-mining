@@ -19,7 +19,7 @@ pip install -r requirements.txt
 
 ## Quick Start
 ### Data Format
-**Additional Statement：** We organize [an evaluation](http://e-com.ac.cn/ccl2022.html/) in CCL2022. So the annoation in test.json is not available currently and we use "O" as replacement. After the evaluation, we'll open full dataset.
+**Additional Statement：** We organize [an evaluation](http://e-com.ac.cn/ccl2022.html/) in CCL2022. So the annoation in test data is not available currently. After the evaluation, we'll open full dataset.
 
 Data folder contains two folders: ECOB-EN and ECOB-ZH.
 
@@ -27,53 +27,62 @@ Before training models, you should first download [data](http://e-com.ac.cn/stat
 ```
 data
 ├── ECOB-ZH  # Chinese dataset.
-├── ── train.json
-├── ── dev.json
-├── ── test.json
+├── ── train.doc.json
+├── ── train.ann.json
+├── ── dev.doc.json
+├── ── dev.ann.json
+├── ── test.doc.json
 ├──   ECOB-EN  # English dataset.
-├── ── train.json
-├── ── dev.json
-└── ── test.json
+├── ── train.doc.json
+├── ── train.ann.json
+├── ── dev.doc.json
+├── ── dev.ann.json
+└── ── test.doc.json
 ```
 
 The data format is as follows:
+
+In train/dev/test.doc.json, each JSON instance represents a document.
 ```
 {
     "Descriptor": {
-        "text": "EU orders Apple to repay $14.5bn in taxes",
+        "event_id": (int) event_id,
+        "text": "Event descriptor."
     },
     "Doc": {
-        "id": 1917,
-        "title": "EU competition chief Margrethe Vestager is leading the probe into Apple's tax affairs",
+        "doc_id": (int) doc_id,
+        "title": "Title of document.",
         "content": [
-            [
-                "Apple could be ordered to pay billions of euros in back taxes in the Republic of Ireland by European Union competition officials.",
-                "O",
-                "O"
-            ],
+            {
+                "sent_idx": 0,
+                "sent_text": "Raw text of the first sentence."
+            },
+            {
+                "sent_idx": 1,
+                "sent_text": "Raw text of the second sentence."
+            },
             ...
-            [
-                "Last week the US Treasury Department said the European Commission was in danger of becoming a "supra-national tax authority" overriding the tax codes of its member states.",
-                "B",
-                "EU"
-            ],
-            ...
-            [
-                "“This is not a decision against the United States of America,” Juncker told reporters.",
-                "B",
-                "EU orders Apple to repay $14.5bn in taxes"
-            ],
-            [
-                "“It would be absurd to choose this territory of state taxation to attack the USA,” he added, according to AFP.",
-                "I",
-                "EU orders Apple to repay $14.5bn in taxes"
-            ]
+            {
+                "sent_idx": n-1,
+                "sent_text": "Raw text of the (n-1)th sentence."
+            }
         ]
     }
-},
 }
 ```
-train/val/test.json are data files and each line is a JSON instance. Each JSON instance contains Descriptor and Doc fields, in which Descriptor is event descriptor, and Doc is the annotated document.
+
+In train/dev/test.ann.json, each JSON instance represents an opinion extracted from documents.
+```
+[
+	{
+        "event_id": (int) event_id,
+        "doc_id": (int) doc_id,
+        "start_sent_idx": (int) "Sent idx of first sentence of the opinion.",
+        "end_sent_idx": (int) "Sent idx of last sentence of the opinion.",
+        "argument": (str) "Event argument (opinion target) of the opinion."
+  	}
+]
+```
 
 ### Model Training
 
