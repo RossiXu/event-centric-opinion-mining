@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 from transformers import BertModel
 
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
@@ -40,8 +41,12 @@ class BertLSTMEncoder(nn.Module):
         # sentence embedding
         batch_sent = batch_sent[:, :, :420]  # (batch_size, max_sent_len, max_num_len)
         batch_sent_flatten = batch_sent.view(-1, batch_sent.shape[2])  # (batch_size*max_sent_len, max_num_len)
-        batch_sent_output = self.bert(batch_sent_flatten, attention_mask=batch_sent_flatten.gt(0))[0]  # (batch_size*max_seq_len, max_num_len, hidden_size)
-        batch_sent_output = batch_sent_output[:, 0, :].view(batch_sent.shape[0], batch_sent.shape[1], -1) # (batch_size, max_seq_len, hidden_size)
+        try:
+            batch_sent_output = self.bert(batch_sent_flatten, attention_mask=batch_sent_flatten.gt(0))[0]  # (batch_size*max_seq_len, max_num_len, hidden_size)
+        except RuntimeError:
+            print(batch_sent.shape)
+        batch_sent_output = batch_sent_output[:, 0, :].view(batch_sent.shape[0], batch_sent.shape[1], -1)  # (batch_size, max_seq_len, hidden_size)
+
         # Sentence LSTM
         sent_rep = self.word_drop(batch_sent_output)
         sorted_seq_len, permIdx = sent_seq_lens.sort(0, descending=True)

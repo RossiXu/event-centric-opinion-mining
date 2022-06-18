@@ -22,9 +22,9 @@ def parse_arguments(parser):
                         help="GPU/CPU devices")
     parser.add_argument('--data_dir', type=str, default='../../data/')
     parser.add_argument('--result_dir', type=str, default='../../result/chinese_result/')
-    parser.add_argument('--train_file', type=str, default="train.json")
-    parser.add_argument('--dev_file', type=str, default="dev.json")
-    parser.add_argument('--test_file', type=str, default="test.json")
+    parser.add_argument('--train_file', type=str, default="train")
+    parser.add_argument('--dev_file', type=str, default="dev")
+    parser.add_argument('--test_file', type=str, default="test")
     parser.add_argument('--bert', type=str, default="bert-base-cased")
     parser.add_argument('--lr', type=float, default=5e-6)
     parser.add_argument('--lr_decay', type=float, default=0)
@@ -50,9 +50,9 @@ def train_model(retrain=True):
 
     # Load training data.
     if retrain:
-        train_df = data_preprocess(data_dir + train_file)
-        dev_df = data_preprocess(data_dir + dev_file)
-        eval_df = data_preprocess(data_dir + test_file)
+        train_df = read_data(data_dir + train_file)
+        dev_df = read_data(data_dir + dev_file)
+        eval_df = read_data(data_dir + test_file)
 
     # Get Bert input format.
     if retrain:
@@ -84,7 +84,7 @@ def train_model(retrain=True):
         optimizer = lr_decay(learning_rate, lr_decay_metric, optimizer, epoch_i)
         # train model in train dataset.
         for step, batch in enumerate(tqdm(train_batches)):
-            input_ids, token_type_ids, attention_mask, labels, _, _ = batch
+            input_ids, token_type_ids, attention_mask, labels, _, _, _, _, _ = batch
             input_ids = input_ids.to(device)
             token_type_ids = token_type_ids.to(device)
             attention_mask = attention_mask.to(device)
@@ -106,7 +106,7 @@ def train_model(retrain=True):
         dev_pred_labels = []
         with torch.no_grad():
             for step, batch in tqdm(enumerate(dev_batches)):
-                input_ids, token_type_ids, attention_mask, labels, _, _ = batch
+                input_ids, token_type_ids, attention_mask, labels, _, _, _, _, _ = batch
                 input_ids = input_ids.to(device)
                 token_type_ids = token_type_ids.to(device)
                 attention_mask = attention_mask.to(device)
@@ -137,7 +137,7 @@ def train_model(retrain=True):
     eval_pred_labels = []
     with torch.no_grad():
         for step, batch in tqdm(enumerate(eval_batches)):
-            input_ids, token_type_ids, attention_mask, labels, _, _ = batch
+            input_ids, token_type_ids, attention_mask, labels, _, _, _, _, _ = batch
             input_ids = input_ids.to(device)
             token_type_ids = token_type_ids.to(device)
             attention_mask = attention_mask.to(device)
@@ -158,7 +158,7 @@ def train_model(retrain=True):
 
 def get_match_result(file_name, model):
     # Init.
-    eval_df = data_preprocess(data_dir + file_name)
+    eval_df = read_data(data_dir + file_name)
     eval_batches = data_batch(eval_df, batch_size, raw_model, False)
 
     # Predict.
@@ -167,11 +167,17 @@ def get_match_result(file_name, model):
     eval_pred_labels = []
     sents = []
     events = []
+    event_ids = []
+    doc_ids = []
+    sent_ids = []
     with torch.no_grad():
         for step, batch in tqdm(enumerate(eval_batches)):
-            input_ids, token_type_ids, attention_mask, labels, sent, event = batch
+            input_ids, token_type_ids, attention_mask, labels, sent, event, event_id, doc_id, sent_id = batch
             sents.extend(sent)
             events.extend(event)
+            event_ids.extend(event_id)
+            doc_ids.extend(doc_id)
+            sent_ids.extend(sent_id)
 
             input_ids = input_ids.to(device)
             token_type_ids = token_type_ids.to(device)
@@ -189,15 +195,28 @@ def get_match_result(file_name, model):
     print('Accuracy: ', acc)
 
     # Save match result
-    insts = zip(events, sents, eval_gold_labels, eval_pred_labels)
+    opinions = []
+    for idx, pred_label in enumerate(eval_pred_labels):
+        opinion = {'event_id': event_ids[idx],
+                   'doc_id': doc_ids[idx],
+                   'start_sent_idx': sent_ids[idx],
+                   'end_sent_idx': sent_ids[idx]}
+        opinions.append(opinion)
     with open(result_dir + result_file, 'w', encoding='utf-8') as f:
-        for inst in insts:
-            f.write("{}\t{}\t{}\t{}\n".format(inst[0], inst[1], inst[2], inst[3]))
+        f.write(json.dumps(opinions))
 
 
 if __name__ == '__main__':
     """
-    python main.py --bert bert-base-chinese --lr 5e-6 --batch_size 24 --retrain 1
+    python eoe_model/paircls/main.py \
+       --bert bert-base-chinese \
+       --lr 5e-6 \
+       --batch_size 24 \
+       --retrain 1 \
+       --num_epochs 10 \
+       --model_folder model_files/chinese_model/ \
+       --data_dir data/ECOB-ZH/ \
+       --result_dir result/chinese_result/
     """
     # Parse arguments.
     parser = argparse.ArgumentParser(description="Pair Classification")
@@ -215,7 +234,7 @@ if __name__ == '__main__':
     dev_file = args.dev_file
     test_file = args.test_file
     result_dir = args.result_dir
-    result_file = 'pair_classification.results'
+    result_file = 'pair_classification.pred.json'
     best_model_dir = args.model_folder + 'best_pair_cls_model_' + str(batch_size) + '_' + str(learning_rate) + '_' + str(lr_decay_metric)
     model_dir = args.model_folder + 'pair_cls_model_' + str(batch_size) + '_' + str(learning_rate) + '_' + str(lr_decay_metric)
 

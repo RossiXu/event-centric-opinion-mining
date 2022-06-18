@@ -4,27 +4,49 @@ import numpy as np
 import pandas as pd
 import random
 import torch
+from termcolor import colored
 from transformers import BertTokenizer
 from tqdm import tqdm
 
 
-def data_preprocess(file_name):
-    with open(file_name, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+def read_data(file_name):
+    print("Reading " + file_name + " file.")
+    insts = []
+
+    # Read document.
+    with open(file_name + '.doc.json', 'r', encoding='utf-8') as f:
+        docs = json.load(f)
+
+    # Read annotation.
+    try:
+        with open(file_name + '.ann.json', 'r', encoding='utf-8') as f:
+            opinions = json.load(f)
+    except FileNotFoundError:
+        opinions = []
+        print(colored('[There is no ' + file_name + '.ann.json.]', 'red'))
 
     pairs = []
-    for passage in data:
-        event = passage['Descriptor']['text']
-        contents = passage['Doc']['content']
-        sents = [content[0].strip() for content in contents]
-        labels = [content[1].strip() for content in contents]
-        for idx, sent in enumerate(sents):
-            label = 0 if labels[idx] == 'O' else 1
-            pairs.append([sent, event, label])
+    for doc in docs:
+        event = doc['Descriptor']['text']
+        event_id = doc['Descriptor']['event_id']
+        doc_id = doc['Doc']['doc_id']
+        contents = doc['Doc']['content']
+        sents = [content['sent_text'] for content in contents]
+        labels = ['O'] * len(sents)
+        doc_opinions = [opinion for opinion in opinions if int(opinion['doc_id']) == int(doc_id)]
+        for opinion in doc_opinions:
+            for sent_idx in range(opinion['start_sent_idx'], opinion['end_sent_idx'] + 1):
+                labels[sent_idx] = 'I'
+            labels[opinion['start_sent_idx']] = 'B'
+        for sent_idx, sent in enumerate(sents):
+            label = 0 if labels[sent_idx] == 'O' else 1
+            pairs.append([sent, event, label, event_id, doc_id, sent_idx])
 
     data = pd.DataFrame(pairs)
-    data.columns = ['sent', 'event', 'is_opinion']
-    print(file_name, len(data), sum([pair[2] for pair in pairs]), len(pairs)-sum([pair[2] for pair in pairs]))
+    data.columns = ['sent', 'event', 'is_opinion', 'event_id', 'doc_id', 'sent_id']
+
+    print("Number of sentences: {}".format(len(data)))
+    print("Number of opinion sentences: {}".format(sum([pair[2] for pair in pairs])))
     return data
 
 
@@ -83,16 +105,19 @@ def data_batch(data_df, batch_size, raw_model, shffule=True):
     text_a = list(data_df.loc[:, 'sent'])
     text_b = list(data_df.loc[:, 'event'])
     labels = list(data_df.loc[:, 'is_opinion'])
+    event_ids = list(data_df.loc[:, 'event_id'])
+    doc_ids = list(data_df.loc[:, 'doc_id'])
+    sent_ids = list(data_df.loc[:, 'sent_id'])
 
     # Shuffle.
-    inputs = list(zip(text_a, text_b, labels))
+    inputs = list(zip(text_a, text_b, labels, event_ids, doc_ids, sent_ids))
     if shffule:
         inputs = sorted(inputs, key=lambda x: len(x[0] + x[1]))
 
     batches = []
     for i in tqdm(range(0, len(inputs), batch_size)):
         batch = inputs[i:min(i + batch_size, len(inputs) + 1)]
-        batch_text_a, batch_text_b, batch_labels = zip(*batch)
+        batch_text_a, batch_text_b, batch_labels, batch_event_ids, batch_doc_ids, batch_sent_ids = zip(*batch)
         tokenized_input = tokenizer(batch_text_a, batch_text_b, max_length=512, padding=True, truncation=True)
         input_ids, token_type_ids, attention_mask = tokenized_input.input_ids, \
                                                     tokenized_input.token_type_ids, \
@@ -102,7 +127,10 @@ def data_batch(data_df, batch_size, raw_model, shffule=True):
                        torch.LongTensor(attention_mask),
                        torch.LongTensor(batch_labels),
                        batch_text_a,
-                       batch_text_b)
+                       batch_text_b,
+                       batch_event_ids,
+                       batch_doc_ids,
+                       batch_sent_ids)
         batches.append(batch_input)
     if shffule:
         random.shuffle(batches)

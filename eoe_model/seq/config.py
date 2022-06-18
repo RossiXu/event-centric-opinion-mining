@@ -36,7 +36,6 @@ class Config:
         self.char_emb_size = 25
         self.charlstm_hidden_dim = 50
         self.use_char_rnn = args.use_char_rnn
-        self.is_eval = args.is_eval
 
         # Data specification
         self.train_file = args.train_file

@@ -11,23 +11,41 @@ from typing import List
 
 
 def read_data(file: str, number: int = 5) -> List[Instance]:
-    print("Reading file: " + file)
+    print("Reading " + file + " file.")
     insts = []
 
-    # construct instances
-    with open(file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        if number > 0:
-            data = data[:number]
-            print(data)
+    # Read document.
+    with open(file + '.doc.json', 'r', encoding='utf-8') as f:
+        docs = json.load(f)
 
-    for passage in data:
-        event = passage['Descriptor']['text']
-        title = passage['Doc']['title']
-        contents = passage['Doc']['content']
-        sents, labels, targets = zip(*[[content[0].strip(), content[1].strip(), content[2].strip()] for content in contents])
-        inst = Instance(list(sents), event, title, list(labels), list(targets))
+    # Read annotation.
+    try:
+        with open(file + '.ann.json', 'r', encoding='utf-8') as f:
+            opinions = json.load(f)
+    except FileNotFoundError:
+        opinions = []
+        print(colored('[There is no ' + file + '.ann.json.]', 'red'))
+
+    for doc in docs:
+        event = doc['Descriptor']['text']
+        event_id = doc['Descriptor']['event_id']
+        doc_id = doc['Doc']['doc_id']
+        title = doc['Doc']['title']
+        contents = doc['Doc']['content']
+        sents = [content['sent_text'] for content in contents]
+        labels = ['O'] * len(sents)
+        targets = ['O'] * len(sents)
+        doc_opinions = [opinion for opinion in opinions if int(opinion['doc_id']) == int(doc_id)]
+        for opinion in doc_opinions:
+            for sent_idx in range(opinion['start_sent_idx'], opinion['end_sent_idx'] + 1):
+                labels[sent_idx] = 'I'
+                targets[sent_idx] = opinion['argument']
+            labels[opinion['start_sent_idx']] = 'B'
+        inst = Instance(doc_id, sents, event, event_id, title, labels, targets)
         insts.append(inst)
+
+    if number > 0:
+        insts = insts[:number]
 
     print("Number of documents: {}".format(len(insts)))
     return insts
@@ -165,22 +183,41 @@ def use_ibo(label):
 
 def write_results(filename: str, insts):
     """
-    Save sentence NER result.
-    Each line format: sent   gold_label  predicted_label
+    Save results.
+    Each json instance is an opinion.
     """
-    f = open(filename, 'w', encoding='utf-8')
+    opinions = []
     for inst in insts:
-        event = inst.event
-        title = inst.title
-        f.write(event + '\n')
-        f.write(title + '\n')
-        for i in range(len(inst.input)):
-            sents = inst.input
-            output = inst.output
-            aspect = inst.target
-            prediction = inst.prediction
-            assert len(output) == len(prediction)
-            # sent, pred_label, gold_aspect, gold_label
-            f.write("{}\t{}\t{}\t{}\n".format(sents[i], use_ibo(prediction[i]), aspect[i], use_ibo(output[i])))
-        f.write("-"*54 + '\n')
-    f.close()
+        event_id = inst.event_id
+        doc_id = inst.doc_id
+        labels = inst.prediction
+
+        start_sent_idx = -1
+        end_sent_idx = -1
+        for sent_idx, label in enumerate(labels):
+            if label == 'E':
+                label = 'I'
+            if label == 'S':
+                label = 'B'
+            if label == 'B':
+                if start_sent_idx != -1:
+                    opinion = {'event_id': event_id, 'doc_id': doc_id, 'start_sent_idx': start_sent_idx,
+                               'end_sent_idx': end_sent_idx}
+                    opinions.append(opinion)
+                start_sent_idx = sent_idx
+                end_sent_idx = sent_idx
+            elif label == 'I':
+                end_sent_idx = sent_idx
+            elif label == 'O':
+                if start_sent_idx != -1 and start_sent_idx <= end_sent_idx:
+                    opinion = {'event_id': event_id, 'doc_id': doc_id, 'start_sent_idx': start_sent_idx,
+                               'end_sent_idx': end_sent_idx}
+                    opinions.append(opinion)
+                start_sent_idx = -1
+                end_sent_idx = -1
+        if start_sent_idx != -1 and start_sent_idx <= end_sent_idx:
+            opinion = {'event_id': event_id, 'doc_id': doc_id, 'start_sent_idx': start_sent_idx,
+                       'end_sent_idx': end_sent_idx}
+            opinions.append(opinion)
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(json.dumps(opinions))
