@@ -1,5 +1,5 @@
 # Event-Centric Opinion Mining
-- An An implementation for EcO v1: Towards Event-Centric Opinion Mining.
+- An implementation for EcO v1: Towards Event-Centric Opinion Mining.
 - Please contact @Ruoxi Xu (ruoxi2021@iscas.ac.cn) for questions and suggestions.
 
 ## Requirements
@@ -19,11 +19,11 @@ pip install -r requirements.txt
 
 ## Quick Start
 ### Data Format
-**Additional Statement：** We plan to organize an evaluation in CCL2022. So the annoation in test.json is not available currently and we use "O" as replacement. After the evaluation, we'll open full dataset.
+**Additional Statement：** We organize [an evaluation](http://e-com.ac.cn/ccl2022.html/) in CCL2022. So the annoation in test.json is not available currently and we use "O" as replacement. After the evaluation, we'll open full dataset.
 
 Data folder contains two folders: ECOB-EN and ECOB-ZH.
 
-Before training models, you should first download [data](http://123.57.148.143/ECO_Bank.zip) and unzip them as follows. 
+Before training models, you should first download [data](http://e-com.ac.cn/static/home/ECO_Bank.zip) and unzip them as follows. 
 ```
 data
 ├── ECOB-ZH  # Chinese dataset.
