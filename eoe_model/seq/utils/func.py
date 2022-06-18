@@ -220,4 +220,4 @@ def write_results(filename: str, insts):
                        'end_sent_idx': end_sent_idx}
             opinions.append(opinion)
     with open(filename, 'w', encoding='utf-8') as f:
-        f.write(json.dumps(opinions))
+        f.write(json.dumps(opinions, ensure_ascii=False))

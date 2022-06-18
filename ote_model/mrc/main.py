@@ -248,18 +248,18 @@ def evaluate(args, model, tokenizer, prefix=""):
         output_file = os.path.join(args.result_dir, args.result_file.format(prefix))
         opinions = []
         for example in examples:
-            opinion = {'event_id': example.event_id, 'doc_id': example.doc_id,
-                       'start_sent_idx': example.start_sent_idx, 'end_sent_idx': example.end_sent_idx,
-                       'argument': get_clear_text(all_predictions[example.qas_id])}
+            if args.language == 'english':
+                opinion = {'event_id': example.event_id, 'doc_id': example.doc_id,
+                           'start_sent_idx': example.start_sent_idx, 'end_sent_idx': example.end_sent_idx,
+                           'argument': all_predictions[example.qas_id]}
+            else:
+                opinion = {'event_id': example.event_id, 'doc_id': example.doc_id,
+                           'start_sent_idx': example.start_sent_idx, 'end_sent_idx': example.end_sent_idx,
+                           'argument': get_clear_text(all_predictions[example.qas_id])}
             opinions.append(opinion)
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(json.dumps(opinions, ensure_ascii=False))
-        # with open(output_file, 'w', encoding='utf-8') as f:
-        #     for example in examples:
-        #         if args.language == 'english':
-        #             f.write(' '.join(example.doc_tokens) + '\t' + example.orig_answer_text + '\t' + all_predictions[example.qas_id] + '\t' + example.question_text + '\n')
-        #         else:
-        #             f.write(''.join(example.doc_tokens) + '\t' + example.orig_answer_text + '\t' + get_clear_text(all_predictions[example.qas_id]) + '\t' + example.question_text + '\n')
+            logger.info('Writing result to: ' + output_file)
         logger.info('Eval Precision: ' + str(corr_num / len(examples)) + '\t' + str(corr_num) + '\t' + str(len(examples)))
 
     return result

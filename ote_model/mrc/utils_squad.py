@@ -180,6 +180,7 @@ def read_squad_examples(input_file, language='english', opinion_level='segment')
                                           event_id, doc_id,
                                           doc_opinion['start_sent_idx'], doc_opinion['end_sent_idx']])
             except KeyError:
+                print(colored('[There is no gold argument!', 'red'))
                 opinions_reformat.append([opinion_text, event, '',
                                           event_id, doc_id,
                                           doc_opinion['start_sent_idx'], doc_opinion['end_sent_idx']])

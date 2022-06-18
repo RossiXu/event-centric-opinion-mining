@@ -75,11 +75,11 @@ In train/dev/test.ann.json, each JSON instance represents an opinion extracted f
 ```
 [
 	{
-        "event_id": (int) event_id,
-        "doc_id": (int) doc_id,
-        "start_sent_idx": (int) "Sent idx of first sentence of the opinion.",
-        "end_sent_idx": (int) "Sent idx of last sentence of the opinion.",
-        "argument": (str) "Event argument (opinion target) of the opinion."
+            "event_id": (int) event_id,
+            "doc_id": (int) doc_id,
+            "start_sent_idx": (int) "Sent idx of first sentence of the opinion.",
+            "end_sent_idx": (int) "Sent idx of last sentence of the opinion.",
+            "argument": (str) "Event argument (opinion target) of the opinion."
   	}
 ]
 ```
@@ -157,79 +157,10 @@ python ote_model/enum/main.py \
 
 ### Model Evaluation
 
-#### Seperate
-
-##### Seq / PairCls
 ```python
-# Seq
-python eval/eval_seq.py \
-       --data_dir data/ECOB-ZH/ \
-       --result_dir result/chinese_result/ \
-       --downstream_model gold
-
-# PairCls
-python eval/eval_paircls.py \
-       --data_dir data/ECOB-ZH/ \
-       --result_dir result/chinese_result/ \
-       --downstream_model gold
+python eval/eval.py \
+      --gold_file data/ECOB-ZH/test.ann.json \
+      --pred_file result/chinese_result/pred.ann.json
 ```
-- ```--data_dir``` refers to gold data path. If you want to train model on English dataset, input 'data/ECOB-EN/'.
-- ```--result_dir``` refers to the path where the result saved.
-- ```--downstream_model``` refers to type of downstream model. Evaluate Seq model on EOT if choose 'gold', evaluate Seq-SpanR/MRC pipeline if 'enum'/'mrc'.
-
-##### MRC / SpanR
-
-```python
-# MRC
-python ote_model/mrc/main.py \
-      --model_name_or_path luhua/chinese_pretrain_mrc_roberta_wwm_ext_large \
-      --do_eval \
-      --do_lower_case \
-      --per_gpu_eval_batch_size=4 \
-      --per_gpu_train_batch_size=6 \
-      --output_dir model_files/chinese_model/mrc/ \
-      --data_dir data/ECOB-ZH/ \
-      --result_dir result/chinese_result/ \
-      --predict_file test.json
-python eval/eval_aspect.py \
-      --language chinese \
-      --result_dir result/chinese_result/ \
-      --result_file mrc.results \
-      --downstream_model mrc
-
-# SpanR
-python eval/eval_aspect.py \
-      --language chinese \
-      --result_dir result/chinese_result/ \
-      --result_file enumerate.results \
-      --downstream_model enum
-```
-- ```--language``` refers to the language of data files. If you want to train model on English dataset, input 'english'.
-- ```--result_dir``` refers to the directory where the result saved.
-- ```--result_dir``` refers to the result file name.
-- ```--downstream_model``` refers to type of downstream model. Evaluate Enum/MRC if 'enum'/'mrc'.
-
-
-#### Pipeline
-
-```python
-# PairCls-SpanR/MRC
-python eval/eval_paircls.py \
-       --data_dir data/ECOB-ZH/ \
-       --result_dir result/chinese_result/ \
-       --downstream_model enum \
-       --downstream_file enumerate.results \
-       --opinion_level segment
-
-# Seq-SpanR/MRC
-python eval/eval_seq.py \
-       --data_dir data/ECOB-ZH/ \
-       --result_dir result/chinese_result/ \
-       --downstream_model enum \
-       --downstream_file enumerate.results \
-       --opinion_level segment
-```
-- ```--opinion_level``` refers to segment/sentence-level evaluation metrics. Evaluate by segment/sentence-level if 'segment'/'sent'.
-
 ## License
 The code is released under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License for Noncommercial use only. Any commercial use should get formal permission first.
