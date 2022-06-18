@@ -247,6 +247,7 @@ def main():
 
 if __name__ == "__main__":
     """
+    command:
     python eoe_model/seq/main.py \
        --lr 5e-4 \
        --backbone_lr 1e-6 \
