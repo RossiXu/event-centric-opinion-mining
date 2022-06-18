@@ -8,6 +8,7 @@ from io import open
 
 import jieba
 import tqdm
+from termcolor import colored
 from transformers import BasicTokenizer
 
 
@@ -151,12 +152,40 @@ class InputFeatures(object):
 
 def read_squad_examples(input_file, language='english', opinion_level='segment'):
     """Read a json file into a list of SquadExample."""
-    with open(input_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
 
-    opinions = data_preprocess(data, opinion_level)
+    # Read document.
+    with open(input_file + '.doc.json', 'r', encoding='utf-8') as f:
+        docs = json.load(f)
+
+    # Read annotation.
+    try:
+        with open(input_file + '.ann.json', 'r', encoding='utf-8') as f:
+            opinions = json.load(f)
+    except FileNotFoundError:
+        opinions = []
+        print(colored('[There is no ' + input_file + '.ann.json.]', 'red'))
+
+    opinions_reformat = []
+    for doc in docs:
+        event = doc['Descriptor']['text']
+        event_id = doc['Descriptor']['event_id']
+        doc_id = doc['Doc']['doc_id']
+        contents = doc['Doc']['content']
+        sents = [content['sent_text'] for content in contents]
+        doc_opinions = [opinion for opinion in opinions if int(opinion['doc_id']) == int(doc_id)]
+        for doc_opinion in doc_opinions:
+            opinion_text = sents[doc_opinion['start_sent_idx']:doc_opinion['end_sent_idx']+1]
+            try:
+                opinions_reformat.append([opinion_text, event, doc_opinion['argument'],
+                                          event_id, doc_id,
+                                          doc_opinion['start_sent_idx'], doc_opinion['end_sent_idx']])
+            except KeyError:
+                opinions_reformat.append([opinion_text, event, '',
+                                          event_id, doc_id,
+                                          doc_opinion['start_sent_idx'], doc_opinion['end_sent_idx']])
+
     examples = []
-    for idx, opinion in enumerate(opinions):  # opinion, event, aspect
+    for idx, opinion in enumerate(opinions_reformat):  # opinion, event, aspect, event_id, doc_id, start_sent_idx, end_sent_idx
         qas_id = idx
         question_text = ' '.join(opinion[0])
         is_impossible = False
@@ -165,7 +194,7 @@ def read_squad_examples(input_file, language='english', opinion_level='segment')
         elif language == 'chinese':
             doc_tokens = list(jieba.cut(opinion[1].strip()))
         # if is_training and not is_impossible:
-        if not is_impossible:
+        if not is_impossible and len(opinion[2]):
             answer = opinion[2]
             orig_answer_text = opinion[2]
             start_position, end_position = get_boundary(doc_tokens, answer, language)
@@ -182,6 +211,10 @@ def read_squad_examples(input_file, language='english', opinion_level='segment')
             start_position=start_position,
             end_position=end_position,
             is_impossible=is_impossible)
+        example.event_id = opinion[3]
+        example.doc_id = opinion[4]
+        example.start_sent_idx = opinion[5]
+        example.end_sent_idx = opinion[6]
         examples.append(example)
 
     return examples

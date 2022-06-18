@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import argparse
+import json
 import logging
 import os
 import random
@@ -245,13 +246,21 @@ def evaluate(args, model, tokenizer, prefix=""):
         result['precision'] = corr_num / len(examples)
 
         output_file = os.path.join(args.result_dir, args.result_file.format(prefix))
+        opinions = []
+        for example in examples:
+            opinion = {'event_id': example.event_id, 'doc_id': example.doc_id,
+                       'start_sent_idx': example.start_sent_idx, 'end_sent_idx': example.end_sent_idx,
+                       'argument': get_clear_text(all_predictions[example.qas_id])}
+            opinions.append(opinion)
         with open(output_file, 'w', encoding='utf-8') as f:
-            for example in examples:
-                if args.language == 'english':
-                    f.write(' '.join(example.doc_tokens) + '\t' + example.orig_answer_text + '\t' + all_predictions[example.qas_id] + '\t' + example.question_text + '\n')
-                else:
-                    f.write(''.join(example.doc_tokens) + '\t' + example.orig_answer_text + '\t' + get_clear_text(all_predictions[example.qas_id]) + '\t' + example.question_text + '\n')
-        logger.info('Dev Precision: ' + str(corr_num / len(examples)) + '\t' + str(corr_num) + '\t' + str(len(examples)))
+            f.write(json.dumps(opinions, ensure_ascii=False))
+        # with open(output_file, 'w', encoding='utf-8') as f:
+        #     for example in examples:
+        #         if args.language == 'english':
+        #             f.write(' '.join(example.doc_tokens) + '\t' + example.orig_answer_text + '\t' + all_predictions[example.qas_id] + '\t' + example.question_text + '\n')
+        #         else:
+        #             f.write(''.join(example.doc_tokens) + '\t' + example.orig_answer_text + '\t' + get_clear_text(all_predictions[example.qas_id]) + '\t' + example.question_text + '\n')
+        logger.info('Eval Precision: ' + str(corr_num / len(examples)) + '\t' + str(corr_num) + '\t' + str(len(examples)))
 
     return result
 
@@ -307,13 +316,13 @@ def main():
     parser = argparse.ArgumentParser()
 
     ## Required parameters
-    parser.add_argument("--train_file", default='train.json', type=str,
+    parser.add_argument("--train_file", default='train', type=str,
                         help="Training file.")
-    parser.add_argument("--predict_file", default='dev.json', type=str,
+    parser.add_argument("--predict_file", default='dev', type=str,
                         help="Predicting file.")
     parser.add_argument("--data_dir", default='../../data/', type=str)
     parser.add_argument("--result_dir", default='../../result/chinese_result', type=str)
-    parser.add_argument("--result_file", default='mrc.results', type=str)
+    parser.add_argument("--result_file", default='mrc.results.json', type=str)
     parser.add_argument("--model_type", default='bert', type=str,
                         help="Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys()))
     parser.add_argument("--model_name_or_path", default=None, type=str, required=True)
