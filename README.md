@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 Data folder contains two folders: ECOB-EN and ECOB-ZH.
 
-Before training models, you should first download [data](http://e-com.ac.cn/static/home/ECO_Bank.zip) and unzip them as follows. 
+Before training models, you should first download data and unzip them as follows. 
 ```
 data
 ├── ECOB-ZH  # Chinese dataset.
