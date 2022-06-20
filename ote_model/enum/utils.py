@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import random
 import torch
+from termcolor import colored
 from transformers import BertTokenizer
 from tqdm import tqdm
 import jieba
@@ -32,51 +33,55 @@ def get_spans(text, language='english'):
 
 
 def data_preprocess(file_name, ratio=3, opinion_level='segment', language='english'):
-    with open(file_name, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    print("Reading " + file_name + " file.")
 
-    insts = []
+    # Read document.
+    with open(file_name + '.doc.json', 'r', encoding='utf-8') as f:
+        docs = json.load(f)
+
+    # Read annotation.
+    try:
+        with open(file_name + '.ann.json', 'r', encoding='utf-8') as f:
+            opinions = json.load(f)
+    except FileNotFoundError:
+        opinions = []
+        print(colored('[There is no ' + file_name + '.ann.json.]', 'red'))
+
     spans = {}  # event: spans
-    for passage in data:
-        event = passage['Descriptor']['text'].strip()
-        contents = passage['Doc']['content']
-        sents = [content[0].strip() for content in contents]
-        labels = [content[1].strip() for content in contents]
-        aspects = [content[2].strip() for content in contents]
+    insts = []
+    for doc in docs:
+        event = doc['Descriptor']['text']
+        event_id = doc['Descriptor']['event_id']
+        doc_id = doc['Doc']['doc_id']
+        contents = doc['Doc']['content']
+        sents = [content['sent_text'] for content in contents]
 
         if event not in spans.keys():
             spans[event] = get_spans(event, language)
 
-        if opinion_level == 'sent':
-            for idx, label in enumerate(labels):
-                if label == 'B' or label == 'I':
-                    insts.append([sents[idx].strip(), spans[event], event, aspects[idx]])
-        elif opinion_level == 'segment':
-            opinion = ''
-            for idx, label in enumerate(labels):
-                if (label == 'B' and not opinion) or label == 'I':
-                    opinion += sents[idx]
-                elif label == 'B' and opinion:
-                    old_aspect = aspects[idx - 1]
-                    insts.append([opinion, spans[event], event, old_aspect])
-                    opinion = sents[idx]
-                elif label == 'O' and opinion:
-                    old_aspect = aspects[idx - 1]
-                    insts.append([opinion, spans[event], event, old_aspect])
-                    opinion = ''
-            if opinion:
-                insts.append([opinion, spans[event], event, aspects[-1]])
+        doc_opinions = [opinion for opinion in opinions if int(opinion['doc_id']) == int(doc_id)]
+        for doc_opinion in doc_opinions:
+            opinion_sents = sents[doc_opinion['start_sent_idx']:doc_opinion['end_sent_idx']+1]
+            opinion_text = ' '.join(opinion_sents)
+            try:
+                argument = doc_opinion['argument']
+            except KeyError:
+                print(colored('[There is no gold argument!', 'red'))
+                argument = ''
 
-    print(file_name, 'num of opinions:', len(insts), sep='\t')
+            inst = [opinion_text, spans[event], event, argument, event_id, doc_id, doc_opinion['start_sent_idx'], doc_opinion['end_sent_idx']]
+            insts.append(inst)
+
+    print(file_name, 'Number of opinions:', len(insts), sep='\t')
     input_insts = []
     for inst in insts:
-        input_insts.append([inst[0], inst[3], 1, inst[3]])
+        input_insts.append([inst[0], inst[3], 1, inst[3], inst[4], inst[5], inst[6], inst[7]])
         choice_spans = random.sample(inst[1], min(ratio, len(inst[1])))
         for choice_span in choice_spans:
             if choice_span != inst[3]:
-                input_insts.append([inst[0], choice_span, 0, inst[3]])
+                input_insts.append([inst[0], choice_span, 0, inst[3], inst[4], inst[5], inst[6], inst[7]])
     data = pd.DataFrame(input_insts)
-    data.columns = ['sent', 'span', 'is_aspect', 'gold_aspect']
+    data.columns = ['sent', 'span', 'is_aspect', 'gold_aspect', 'event_id', 'doc_id', 'start_sent_idx', 'end_sent_idx']
     return data
 
 
@@ -136,16 +141,20 @@ def data_batch(data_df, batch_size, shuffle=True):
     text_b = list(data_df.loc[:, 'span'])
     labels = list(data_df.loc[:, 'is_aspect'])
     gold_aspect = list(data_df.loc[:, 'gold_aspect'])
+    event_id = list(data_df.loc[:, 'event_id'])
+    doc_id = list(data_df.loc[:, 'doc_id'])
+    start_sent_idx = list(data_df.loc[:, 'start_sent_idx'])
+    end_sent_idx = list(data_df.loc[:, 'end_sent_idx'])
 
     # Shuffle.
-    inputs = list(zip(text_a, text_b, labels, gold_aspect))
+    inputs = list(zip(text_a, text_b, labels, gold_aspect, event_id, doc_id, start_sent_idx, end_sent_idx))
     if shuffle:
         inputs = sorted(inputs, key=lambda x: len(x[0] + x[1]))
 
     batches = []
     for i in tqdm(range(0, len(inputs), batch_size)):
         batch = inputs[i:min(i + batch_size, len(inputs) + 1)]
-        batch_text_a, batch_text_b, batch_labels, batch_gold_aspect = zip(*batch)
+        batch_text_a, batch_text_b, batch_labels, batch_gold_aspect, batch_event_id, batch_doc_id, batch_start_sent_idx, batch_end_sent_idx = zip(*batch)
         tokenized_input = tokenizer(batch_text_a, batch_text_b, max_length=512, padding='max_length', truncation='longest_first')
         input_ids, token_type_ids, attention_mask = tokenized_input.input_ids, \
                                                     tokenized_input.token_type_ids, \
@@ -156,7 +165,11 @@ def data_batch(data_df, batch_size, shuffle=True):
                        torch.LongTensor(batch_labels),
                        batch_text_a,
                        batch_text_b,
-                       batch_gold_aspect)
+                       batch_gold_aspect,
+                       batch_event_id,
+                       batch_doc_id,
+                       batch_start_sent_idx,
+                       batch_end_sent_idx)
         batches.append(batch_input)
     if shuffle:
         random.shuffle(batches)

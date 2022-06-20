@@ -11,7 +11,6 @@ from tqdm import tqdm
 
 def read_data(file_name):
     print("Reading " + file_name + " file.")
-    insts = []
 
     # Read document.
     with open(file_name + '.doc.json', 'r', encoding='utf-8') as f:

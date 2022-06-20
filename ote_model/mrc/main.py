@@ -322,7 +322,7 @@ def main():
                         help="Predicting file.")
     parser.add_argument("--data_dir", default='../../data/', type=str)
     parser.add_argument("--result_dir", default='../../result/chinese_result', type=str)
-    parser.add_argument("--result_file", default='mrc.results.json', type=str)
+    parser.add_argument("--result_file", default='mrc.ann.json', type=str)
     parser.add_argument("--model_type", default='bert', type=str,
                         help="Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys()))
     parser.add_argument("--model_name_or_path", default=None, type=str, required=True)

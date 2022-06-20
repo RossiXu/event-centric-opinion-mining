@@ -26,10 +26,10 @@ def parse_arguments(parser):
                         help="GPU/CPU devices")
     parser.add_argument('--data_dir', type=str, default='../../data/')
     parser.add_argument('--result_dir', type=str, default='../../result/chinese_result/')
-    parser.add_argument('--result_file', type=str, default='enumerate.results')
-    parser.add_argument('--train_file', type=str, default="train.json")
-    parser.add_argument('--dev_file', type=str, default="dev.json")
-    parser.add_argument('--test_file', type=str, default="test.json")
+    parser.add_argument('--result_file', type=str, default='spanr.ann.json')
+    parser.add_argument('--train_file', type=str, default="train")
+    parser.add_argument('--dev_file', type=str, default="dev")
+    parser.add_argument('--test_file', type=str, default="test")
     parser.add_argument('--bert', type=str, default="bert-base-cased")
     parser.add_argument('--opinion_level', type=str, default='segment', choices=['segment', 'sent'])
     parser.add_argument('--retrain', type=int, default=1, choices=[0, 1])
@@ -126,10 +126,10 @@ def get_match_result(file_name, model, opinion_level='segment', output=True):
     opinions = []
     spans = []
     probs = []
-    gold_aspects = {}  # opinion: gold_aspect
+    opinion_base_infos = set()
     with torch.no_grad():
         for step, batch in enumerate(tqdm(eval_batches)):
-            input_ids, token_type_ids, attention_mask, labels, opinion, span, gold_aspect = batch
+            input_ids, token_type_ids, attention_mask, labels, opinion, span, gold_aspect, event_id, doc_id, start_sent_id, end_sent_id = batch
 
             input_ids = input_ids.to(device)
             token_type_ids = token_type_ids.to(device)
@@ -142,29 +142,35 @@ def get_match_result(file_name, model, opinion_level='segment', output=True):
             probs.extend(logits[:, 1].tolist())
             spans.extend(span)
             opinions.extend(opinion)
-            gold_aspects.update(dict(zip(opinion, gold_aspect)))
-    insts = []
-    for o in gold_aspects.keys():
-        gold_aspect = gold_aspects[o]
+            opinion_base_infos.update(list(zip(opinion, event_id, doc_id, start_sent_id, end_sent_id, gold_aspect)))
+    pred_opinions = []
+    correct_pred_num = 0
+    for opinion in opinion_base_infos:
         o_probs = probs.copy()
         for idx, prob in enumerate(probs):
-            if opinions[idx] != o:
+            if opinions[idx] != opinion[0]:
                 o_probs[idx] = -9999999
         pred_aspect = spans[o_probs.index(max(o_probs))]
-        insts.append([o, gold_aspect, pred_aspect])
+        gold_aspect = opinion[5]
+        pred_opinion = {'event_id': opinion[1], 'doc_id': opinion[2],
+                        'start_sent_idx': opinion[3], 'end_sent_idx': opinion[4],
+                        'argument': pred_aspect}
+        pred_opinions.append(pred_opinion)
 
-    correct_pred = sum([1 for inst in insts if inst[1] == inst[2]])
-    total = len(insts)
+        if ''.join(pred_aspect.strip().split()) == ''.join(gold_aspect.strip().split()):
+            correct_pred_num += 1
+
+    total = len(pred_opinions)
     if output:
-        print('Accuracy: ', correct_pred / total, correct_pred, total)
+        print('Accuracy: ', correct_pred_num / total, correct_pred_num, total)
 
     # Save match result
     if output:
         with open(result_dir + result_file, 'w', encoding='utf-8') as f:
-            for inst in insts:
-                f.write("{}\t{}\t{}\n".format(inst[0], inst[1], inst[2]))
+            f.write(json.dumps(opinions, ensure_ascii=False))
+            print('Writing result to: ' + result_dir + result_file)
 
-    return correct_pred / total, correct_pred, total
+    return correct_pred_num / total, correct_pred_num, total
 
 
 if __name__ == '__main__':

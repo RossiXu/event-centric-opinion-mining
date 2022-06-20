@@ -1,5 +1,5 @@
 # Event-Centric Opinion Mining
-- An implementation for EcO v1: Towards Event-Centric Opinion Mining.
+- An implementation for ECO v1: Towards Event-Centric Opinion Mining.
 - Please contact @Ruoxi Xu (ruoxi2021@iscas.ac.cn) for questions and suggestions.
 
 ## Requirements
