@@ -1,0 +1,128 @@
+[
+  {
+    "event_id": 1,
+    "doc_id": 2,
+    "start_sent_idx": 3,
+    "end_sent_idx": 4,
+    "argument": "特朗普"
+  },
+  {
+    "event_id": 1,
+    "doc_id": 2,
+    "start_sent_idx": 5,
+    "end_sent_idx": 5,
+    "argument": "特朗普"
+  },
+  {
+    "event_id": 1,
+    "doc_id": 2,
+    "start_sent_idx": 6,
+    "end_sent_idx": 6,
+    "argument": "特朗普"
+  },
+  {
+    "event_id": 1,
+    "doc_id": 2,
+    "start_sent_idx": 9,
+    "end_sent_idx": 11,
+    "argument": "奥巴马"
+  },
+  {
+    "event_id": 1,
+    "doc_id": 2,
+    "start_sent_idx": 12,
+    "end_sent_idx": 14,
+    "argument": "特朗普反击奥巴马夫人"
+  },
+  {
+    "event_id": 30,
+    "doc_id": 81,
+    "start_sent_idx": 8,
+    "end_sent_idx": 8,
+    "argument": "广州招工老板街头排队被工人挑"
+  },
+  {
+    "event_id": 30,
+    "doc_id": 81,
+    "start_sent_idx": 12,
+    "end_sent_idx": 15,
+    "argument": "广州招工老板街头排队被工人挑"
+  },
+  {
+    "event_id": 30,
+    "doc_id": 81,
+    "start_sent_idx": 16,
+    "end_sent_idx": 28,
+    "argument": "广州招工老板街头排队被工人挑"
+  },
+  {
+    "event_id": 30,
+    "doc_id": 82,
+    "start_sent_idx": 7,
+    "end_sent_idx": 23,
+    "argument": "广州招工老板街头排队被工人挑"
+  },
+  {
+    "event_id": 31,
+    "doc_id": 83,
+    "start_sent_idx": 2,
+    "end_sent_idx": 2,
+    "argument": "重大博物馆"
+  },
+  {
+    "event_id": 31,
+    "doc_id": 83,
+    "start_sent_idx": 8,
+    "end_sent_idx": 8,
+    "argument": "重大博物馆藏赝品"
+  },
+  {
+    "event_id": 31,
+    "doc_id": 83,
+    "start_sent_idx": 18,
+    "end_sent_idx": 18,
+    "argument": "重大博物馆藏赝品"
+  },
+  {
+    "event_id": 132,
+    "doc_id": 431,
+    "start_sent_idx": 2,
+    "end_sent_idx": 2,
+    "argument": "哈里夫妇上节目猛爆王室内幕"
+  },
+  {
+    "event_id": 132,
+    "doc_id": 431,
+    "start_sent_idx": 8,
+    "end_sent_idx": 10,
+    "argument": "王室"
+  },
+  {
+    "event_id": 132,
+    "doc_id": 431,
+    "start_sent_idx": 13,
+    "end_sent_idx": 13,
+    "argument": "哈里夫妇上节目猛爆王室内幕"
+  },
+  {
+    "event_id": 132,
+    "doc_id": 431,
+    "start_sent_idx": 14,
+    "end_sent_idx": 14,
+    "argument": "哈里夫妇上节目猛爆王室内幕"
+  },
+  {
+    "event_id": 132,
+    "doc_id": 431,
+    "start_sent_idx": 15,
+    "end_sent_idx": 17,
+    "argument": "哈里夫妇上节目猛爆王室内幕"
+  },
+  {
+    "event_id": 132,
+    "doc_id": 431,
+    "start_sent_idx": 19,
+    "end_sent_idx": 19,
+    "argument": "哈里夫妇上节目猛爆王室内幕"
+  }
+]

@@ -1,0 +1,247 @@
+[
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 0,
+    "end_sent_idx": 0,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 1,
+    "end_sent_idx": 1,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 2,
+    "end_sent_idx": 2,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 4,
+    "end_sent_idx": 4,
+    "argument": "WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 5,
+    "end_sent_idx": 7,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 8,
+    "end_sent_idx": 8,
+    "argument": "WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 9,
+    "end_sent_idx": 9,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 12,
+    "end_sent_idx": 12,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 16,
+    "end_sent_idx": 16,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 17,
+    "end_sent_idx": 17,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 18,
+    "end_sent_idx": 18,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 20,
+    "end_sent_idx": 21,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 22,
+    "end_sent_idx": 22,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 0,
+    "start_sent_idx": 23,
+    "end_sent_idx": 23,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 1,
+    "start_sent_idx": 0,
+    "end_sent_idx": 0,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 1,
+    "start_sent_idx": 1,
+    "end_sent_idx": 1,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 1,
+    "start_sent_idx": 3,
+    "end_sent_idx": 3,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 2,
+    "start_sent_idx": 1,
+    "end_sent_idx": 1,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 2,
+    "start_sent_idx": 4,
+    "end_sent_idx": 5,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 2,
+    "start_sent_idx": 6,
+    "end_sent_idx": 6,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 2,
+    "start_sent_idx": 7,
+    "end_sent_idx": 7,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 2,
+    "start_sent_idx": 8,
+    "end_sent_idx": 9,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 2,
+    "start_sent_idx": 10,
+    "end_sent_idx": 11,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 0,
+    "end_sent_idx": 0,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 1,
+    "end_sent_idx": 1,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 3,
+    "end_sent_idx": 3,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 4,
+    "end_sent_idx": 4,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 6,
+    "end_sent_idx": 6,
+    "argument": "WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 7,
+    "end_sent_idx": 7,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 8,
+    "end_sent_idx": 8,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 11,
+    "end_sent_idx": 12,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 13,
+    "end_sent_idx": 13,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 14,
+    "end_sent_idx": 14,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 16,
+    "end_sent_idx": 18,
+    "argument": "France's Danone to buy WhiteWave"
+  },
+  {
+    "event_id": 0,
+    "doc_id": 3,
+    "start_sent_idx": 20,
+    "end_sent_idx": 20,
+    "argument": "France's Danone to buy WhiteWave"
+  }
+]
