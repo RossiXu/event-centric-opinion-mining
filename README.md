@@ -95,7 +95,6 @@ python eoe_model/seq/main.py \
        --lr 5e-4 \
        --backbone_lr 1e-6 \
        --batch_size 1 \
-       --is_eval 0 \
        --bert bert-base-chinese \
        --num_epochs 10 \
        --data_dir data/ECOB-ZH/ \
