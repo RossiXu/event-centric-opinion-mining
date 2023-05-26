@@ -19,11 +19,11 @@ pip install -r requirements.txt
 
 ## Quick Start
 ### Data Format
-**Additional Statement：** We organize [an evaluation](http://e-com.ac.cn/ccl2022.html/) in CCL2022. So the annoation in test data is not available currently. After the evaluation, we'll open full dataset.
+**Additional Statement：** We organize [an evaluation](http://e-com.ac.cn/ccl2022.html/) in CCL2022.
 
 Data folder contains two folders: ECOB-EN and ECOB-ZH.
 
-Before training models, you should first download [data](http://123.57.148.143:9876/down/mRVUaxtM7oUz) and unzip them as follows. 
+Before training models, you should first download [data](https://47.94.193.253:25898/down/eac0R1Remzo1.zip) and unzip them as follows. 
 ```
 data
 ├── ECOB-ZH  # Chinese dataset.
